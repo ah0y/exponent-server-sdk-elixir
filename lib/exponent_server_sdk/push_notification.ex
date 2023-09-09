@@ -1,4 +1,4 @@
-defmodule ExponentServerSdk.PushNotification do
+defmodule ExponentServerSdk.PushNotification.Client do
   @moduledoc """
   Provides a basic HTTP interface to allow easy communication with the Exponent Push Notification
   API, by wrapping `HTTPotion`.
@@ -21,7 +21,9 @@ defmodule ExponentServerSdk.PushNotification do
   alias ExponentServerSdk.Parser
   alias ExponentServerSdk.PushMessage
   # Necessary for mocks in tests
-  alias __MODULE__
+  alias __MODULE__, as: PushNotification
+
+  @behaviour ExponentServerSdk.PushNotification
 
   @doc """
   Send the push notification request when using a single message map
@@ -29,23 +31,12 @@ defmodule ExponentServerSdk.PushNotification do
 
   @spec push(map(), keyword()) ::
           Parser.success() | Parser.error()
-
-  def push(message, opts \\ [])
-
-  def push(message, opts) when is_map(message) do
+  def push(message, opts \\ []) when is_map(message) do
     message
     |> PushMessage.create()
 
     PushNotification.post!("send", message, [], opts)
     |> Parser.parse()
-  end
-
-  def push(message, opts) when is_map(message) do
-    message
-    |> PushMessage.create()
-
-    PushNotification.post!("send", message, [], opts)
-    |> Parser.parse_list()
   end
 
   @doc """

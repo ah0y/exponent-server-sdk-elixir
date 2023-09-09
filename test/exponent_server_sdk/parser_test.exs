@@ -39,6 +39,7 @@ defmodule ExponentServerSdk.ParserTest do
     ]
 
     assert {:ok, expected} == parse_list(response)
+
     @messages [
       %{
         body: "You got your first message",
@@ -129,3 +130,4 @@ defmodule ExponentServerSdk.ParserTest do
              ]
     end
   end
+end
