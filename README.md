@@ -1,5 +1,5 @@
-ExponentServerSdk
-========
+# ExponentServerSdk
+
 [![Hex.pm](https://img.shields.io/hexpm/v/exponent_server_sdk.svg)](https://hex.pm/packages/exponent_server_sdk)
 [![Build Status](https://travis-ci.org/rdrop/exponent-server-sdk-elixir.svg?branch=master)](https://travis-ci.org/rdrop/exponent-server-sdk-elixir)
 [![Inline docs](https://inch-ci.org/github/rdrop/exponent-server-sdk-elixir.svg?branch=master)](https://inch-ci.org/github/rdrop/exponent-server-sdk-elixir)
@@ -38,6 +38,16 @@ def application do
 end
 ```
 
+This fork supports setting up an access token to be used as bearer token when communication with Expo's APIs. [More in here.](https://docs.expo.dev/push-notifications/sending-notifications/#additional-security)
+
+It's done by setting up a similar module config:
+
+```elixir
+config :exponent_server_sdk,
+       :access_token,
+       System.get_env("EXPO_ACCESS_TOKEN", "MY_ACCESS_TOKEN")
+```
+
 ## Usage
 
 ### Notifications
@@ -63,6 +73,7 @@ message = %{
 ```
 
 #### Multiple Messages:
+
 ```elixir
 
 # Create a list of message maps (auto chunks list into lists of 100)
@@ -87,6 +98,7 @@ message_list = [
 ```
 
 #### Get Messages Delivery Statuses:
+
 ```elixir
 
 # Create a list of message ids
@@ -106,11 +118,13 @@ The complete format of the messages can be found [here.](https://docs.expo.io/ve
 See the [CONTRIBUTING.md](CONTRIBUTING.md) file for contribution guidelines.
 
 ## License
+
 ExponentServerSdk is licensed under the MIT license. For more details, see the `LICENSE`
 file at the root of the repository. It depends on Elixir, which is under the
 Apache 2 license.
 
 ### Inspiration
+
 [ex_twilio](https://github.com/danielberkompas/ex_twilio)
 
 [hex]: http://hex.pm

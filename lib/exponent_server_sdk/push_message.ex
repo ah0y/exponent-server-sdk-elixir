@@ -14,7 +14,8 @@ defmodule ExponentServerSdk.PushMessage do
             priority: "default",
             sound: "default",
             badge: nil,
-            channelId: nil
+            channelId: nil,
+            categoryId: nil
 
   @typedoc """
       https://docs.expo.io/versions/v29.0.0/guides/push-notifications#message-format
@@ -127,7 +128,8 @@ defmodule ExponentServerSdk.PushMessage do
           priority: String.t(),
           sound: String.t() | nil,
           badge: integer,
-          channelId: String.t() | nil
+          channelId: String.t() | nil,
+          categoryId: String.t() | nil
         }
 
   @doc """
@@ -153,7 +155,7 @@ defmodule ExponentServerSdk.PushMessage do
       iex> messages
       [[%ExponentServerSdk.PushMessage{badge: nil, body: "You got your first message", channelId: nil, data: nil, expiration: nil, priority: "default", sound: "default", title: "Pushed!", to: "ExponentPushToken[XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]", ttl: 0}, %ExponentServerSdk.PushMessage{ badge: nil, body: "You got your second message", channelId: nil, data: nil, expiration: nil, priority: "default", sound: "default", title: "Pushed Again!", to: "ExponentPushToken[YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY]", ttl: 0}]]
   """
-  @spec create_from_list(list(map)) :: list(PushMessage.t())
+  @spec create_from_list(list(map)) :: [[PushMessage.t()]]
   def create_from_list(messages) when is_list(messages) do
     messages
     |> Enum.map(fn msg -> struct(PushMessage, msg) end)

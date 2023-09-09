@@ -4,6 +4,8 @@ defmodule ExponentServerSdk.Parser do
   excellent JSON decoder.
   """
 
+  require Logger
+
   @type http_status_code :: number
   @type success :: {:ok, map}
   @type success_list :: {:ok, [map]}
@@ -27,7 +29,7 @@ defmodule ExponentServerSdk.Parser do
   @spec parse(HTTPoison.Response.t()) :: success | error
   def parse(response) do
     handle_errors(response, fn body ->
-      {:ok, json} = Poison.decode(body)
+      {:ok, json} = Jason.decode(body)
       json["data"]
     end)
   end
@@ -45,10 +47,30 @@ defmodule ExponentServerSdk.Parser do
       {:ok, [%{"id" => "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "status" => "ok"}, %{"id" => "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY", "status" => "ok"}]}
   """
   @spec parse_list(HTTPoison.Response.t()) :: success_list | error
-  def parse_list(response) do
+  def parse_list(response, messages \\ []) do
     handle_errors(response, fn body ->
-      {:ok, json} = Poison.decode(body)
+      {:ok, json} = Jason.decode(body)
+
       json["data"]
+      |> put_missing_expo_push_token(messages)
+    end)
+  end
+
+  @spec put_missing_expo_push_token([map()], [map()] | []) :: [any()]
+  def put_missing_expo_push_token(response, messages \\ []) when is_list(response) do
+    response
+    |> Enum.with_index()
+    |> Enum.map(fn {res, index} ->
+      if res["status"] == "error" and res["details"]["error"] == "DeviceNotRegistered" and
+           is_nil(res["details"]["expoPushToken"]) do
+        put_in(
+          res,
+          ["details", "expoPushToken"],
+          Enum.at(messages, index)[:to] || Enum.at(messages, index)["to"]
+        )
+      else
+        res
+      end
     end)
   end
 
@@ -62,8 +84,17 @@ defmodule ExponentServerSdk.Parser do
         :ok
 
       %{body: body, status_code: status} ->
-        {:ok, json} = Poison.decode(body)
-        {:error, json["errors"], status}
+        case Jason.decode(body) do
+          {:ok, json} ->
+            {:error, json["errors"], status}
+
+          {:error, msg} ->
+            Logger.error(
+              "Error parsing expo notification response. Json error: #{inspect(msg)} Body: #{inspect(body)}"
+            )
+
+            {:error, :unknown_error_parsing_expo_response, status}
+        end
     end
   end
 end
